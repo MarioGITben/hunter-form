@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f2f0df">
+  <title>Monster Hunter Wilds | Hunter's Field Relay</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      color-scheme: light;
+      --paper: #e9e1d0;
+      --paper-light: #f5f0e2;
+      --ink: #282c27;
+      --muted: #6d7168;
+      --line: #c3b9a2;
+      --forest: #354138;
+      --forest-dark: #252e28;
+      --lime: #dfc47c;
+      --orange: #bd6245;
+      --blue: #83a6a0;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background-color: var(--paper);
+      background-image: radial-gradient(ellipse at 15% 34%, rgba(189, 98, 69, .1), transparent 32%), radial-gradient(ellipse at 88% 76%, rgba(80, 105, 78, .12), transparent 28%), linear-gradient(rgba(40, 44, 39, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(40, 44, 39, .04) 1px, transparent 1px);
+      background-size: auto, auto, 30px 30px, 30px 30px;
+    }
+
+    button, input, textarea { font: inherit; }
+
+    .screen {
+      width: min(100% - 48px, 1120px);
+      margin: 0 auto;
+      padding: 28px 0 42px;
+      animation: boot-in 550ms ease-out both;
+    }
+
+    .topbar {
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 9px 3px 9px 3px;
+      color: var(--paper-light);
+      background: var(--forest);
+      font-family: 'DM Mono', monospace;
+      font-size: 17px;
+      transform: rotate(-4deg);
+    }
+
+    .top-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .online {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--forest);
+    }
+
+    .online::before {
+      width: 8px;
+      height: 8px;
+      content: '';
+      border-radius: 50%;
+      background: #75a94b;
+      box-shadow: 0 0 0 3px rgba(117, 169, 75, .17);
+    }
+
+    .game-window {
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: 3px;
+      background: var(--paper-light);
+      box-shadow: 7px 7px 0 rgba(40, 44, 39, .86), 0 18px 55px rgba(48, 47, 38, .12);
+    }
+
+    .window-bar {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 20px;
+      border-bottom: 2px solid var(--ink);
+      background: #d9d3c0;
+    }
+
+    .window-title, .window-code {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+    }
+
+    .window-title { display: inline-flex; align-items: center; gap: 9px; }
+
+    .window-title::before {
+      width: 9px;
+      height: 9px;
+      content: '';
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .window-code { color: var(--muted); }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(420px, 1.1fr);
+    }
+
+    .briefing {
+      position: relative;
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px clamp(28px, 5vw, 58px) 34px;
+      overflow: hidden;
+      color: #f7f4df;
+      background: radial-gradient(ellipse at 75% 64%, rgba(189, 98, 69, .18), transparent 23%), linear-gradient(145deg, #465344, var(--forest) 70%);
+    }
+
+    .briefing::before {
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      right: -122px;
+      bottom: 56px;
+      content: '';
+      border: 1px solid rgba(247, 244, 223, .18);
+      border-radius: 50%;
+      background: repeating-radial-gradient(ellipse at 50% 50%, transparent 0 21px, rgba(247, 244, 223, .09) 22px 23px);
+      opacity: .8;
+    }
+
+    .briefing::after {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      right: 96px;
+      bottom: 228px;
+      content: '';
+      border: 3px solid var(--ink);
+      border-radius: 3px 9px 3px 9px;
+      background: var(--orange);
+      box-shadow: 0 0 0 7px rgba(242, 123, 85, .2), 0 0 0 14px rgba(242, 123, 85, .1);
+      transform: rotate(45deg);
+    }
+
+    .chapter {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #c7d7bb;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .chapter-number {
+      display: inline-grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border: 1px solid rgba(247, 244, 223, .5);
+      border-radius: 50%;
+      color: var(--lime);
+    }
+
+    .briefing-copy {
+      position: relative;
+      z-index: 1;
+      margin: 72px 0 auto;
+    }
+
+    .kicker {
+      margin: 0 0 16px;
+      color: var(--lime);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 430px;
+      margin: 0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(42px, 5vw, 62px);
+      font-weight: 700;
+      line-height: .94;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .briefing-copy p:last-child {
+      max-width: 300px;
+      margin: 22px 0 0;
+      color: #d2e0d0;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .quest-objective {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 340px);
+      padding: 15px 16px;
+      border: 1px solid rgba(247, 244, 223, .3);
+      border-left: 4px solid var(--lime);
+      background: rgba(8, 39, 34, .18);
+    }
+
+    .objective-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--lime);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .objective-text { font-size: 12px; line-height: 1.55; }
+
+    .dispatch {
+      padding: 40px clamp(27px, 5vw, 58px) 32px;
+      background: var(--paper-light);
+    }
+
+    .dispatch-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 29px;
+    }
+
+    .dispatch-head h2 {
+      margin: 0 0 6px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .dispatch-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .rank-tag {
+      flex: 0 0 auto;
+      padding: 7px 9px;
+      border: 1px solid var(--ink);
+      border-radius: 3px;
+      color: var(--ink);
+      background: #ddc581;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      transform: rotate(2deg);
+    }
+
+    .progress-track {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 28px;
+    }
+
+    .progress-step {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #98a39a;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .progress-step:not(:last-child)::after {
+      height: 2px;
+      flex: 1;
+      margin: 0 9px;
+      content: '';
+      background: #d8ded3;
+    }
+
+    .step-marker {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 19px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #c5cdc2;
+      border-radius: 50%;
+      background: var(--paper-light);
+      font-size: 9px;
+    }
+
+    .progress-step.is-complete { color: var(--forest); }
+    .progress-step.is-complete .step-marker { border-color: var(--forest); color: var(--paper-light); background: var(--forest); }
+    .progress-step.is-complete:not(:last-child)::after { background: var(--forest); }
+
+    .field { margin-bottom: 19px; }
+
+    .field-topline {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    label { font-size: 12px; font-weight: 700; }
+
+    .field-code {
+      color: #829087;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid #c9d1c2;
+      border-radius: 3px;
+      outline: 0;
+      color: var(--ink);
+      background: #fffef9;
+      font-size: 13px;
+      transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+    }
+
+    input { height: 45px; padding: 0 13px; }
+    textarea { min-height: 114px; padding: 11px 13px; line-height: 1.6; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: #9aa59b; }
+
+    input:focus, textarea:focus {
+      border-color: var(--forest);
+      background: #fff;
+      box-shadow: 3px 3px 0 rgba(23, 78, 67, .13);
+    }
+
+    .dispatch-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 21px;
+    }
+
+    .field-count {
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
+    .field-count strong { color: var(--forest); font-weight: 500; }
+
+    .send-button {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      padding: 0 17px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+      color: var(--ink);
+      background: #d6bd78;
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .send-button:hover { background: #dff783; transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
+    .send-button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+    .send-button:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+    .send-button:disabled { cursor: wait; opacity: .7; transform: none; box-shadow: 3px 3px 0 var(--ink); }
+    .button-arrow { font-size: 17px; line-height: 1; }
+
+    .form-status {
+      min-height: 20px;
+      margin: 17px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .form-status[data-state="success"], .form-status[data-state="error"] { padding: 11px 12px; border: 1px solid; border-radius: 3px; }
+    .form-status[data-state="success"] { border-color: #9bbd99; color: var(--forest-dark); background: #e7f1dc; }
+    .form-status[data-state="error"] { border-color: #e2a691; color: #7d3828; background: #fbebe4; }
+
+    @keyframes boot-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 800px) {
+      .screen { width: min(100% - 32px, 560px); padding-top: 18px; }
+      .game-grid { grid-template-columns: 1fr; }
+      .briefing { min-height: 380px; padding: 28px; }
+      .briefing-copy { margin: 42px 0 32px; }
+      h1 { max-width: 430px; font-size: 52px; }
+      .briefing::before { width: 240px; height: 240px; right: -92px; bottom: -55px; }
+      .briefing::after { right: 67px; bottom: 100px; }
+      .dispatch { padding: 30px 28px; }
+    }
+
+    @media (max-width: 460px) {
+      .screen { width: min(100% - 22px, 560px); padding: 12px 0 24px; }
+      .topbar { margin-bottom: 14px; }
+      .top-meta { gap: 8px; font-size: 8px; }
+      .game-window { box-shadow: 4px 4px 0 var(--ink); }
+      .window-bar { min-height: 41px; padding: 0 12px; }
+      .window-title, .window-code { font-size: 8px; }
+      .briefing { min-height: 350px; padding: 23px; }
+      .briefing-copy { margin: 36px 0 28px; }
+      h1 { font-size: 43px; }
+      .briefing-copy p:last-child { max-width: 270px; margin-top: 16px; font-size: 13px; }
+      .quest-objective { padding: 12px; }
+      .dispatch { padding: 25px 20px 24px; }
+      .dispatch-head { margin-bottom: 24px; }
+      .dispatch-head h2 { font-size: 22px; }
+      .progress-step { gap: 5px; font-size: 8px; }
+      .progress-step:not(:last-child)::after { margin: 0 5px; }
+      .step-marker { width: 17px; height: 17px; flex-basis: 17px; }
+      .dispatch-footer { align-items: flex-start; flex-direction: column; }
+      .send-button { width: 100%; }
+      .rank-tag { font-size: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">+</span> WILDS / FIELD RELAY</div>
+      <div class="top-meta"><span class="online">Research channel active</span><span>Windward Plains / Relay 01</span></div>
+    </header>
+
+    <section class="game-window" aria-label="Research Commission dispatch terminal">
+      <div class="window-bar">
+        <span class="window-title">Research Commission / Field Dispatch</span>
+        <span class="window-code">Terminal RC-014</span>
+      </div>
+
+      <div class="game-grid">
+        <aside class="briefing">
+          <div class="chapter"><span class="chapter-number">01</span> The Forbidden Lands / Field Log</div>
+          <div class="briefing-copy">
+            <p class="kicker">Incoming hunter report</p>
+            <h1>Hunter, send your report.</h1>
+            <p>Record your field notes for the Research Commission. Share what you've encountered, ask a question, or signal the team back at camp.</p>
+          </div>
+          <div class="quest-objective">
+            <span class="objective-label">Report objective</span>
+            <span class="objective-text">Identify yourself, add a return address, and brief the Commission.</span>
+          </div>
+        </aside>
+
+        <section class="dispatch" aria-label="Submit a hunter field report">
+          <div id="questEntry">
+            <div class="dispatch-head">
+              <div>
+                <h2>Field report</h2>
+                <p>New entry / Research Commission archive.</p>
+              </div>
+              <span class="rank-tag">Hunter rank: Recruit</span>
+            </div>
+
+            <div class="progress-track" aria-label="Field report completion">
+              <div class="progress-step" data-step="name"><span class="step-marker">1</span><span>Hunter</span></div>
+              <div class="progress-step" data-step="email"><span class="step-marker">2</span><span>Camp contact</span></div>
+              <div class="progress-step" data-step="message"><span class="step-marker">3</span><span>Field notes</span></div>
+            </div>
+
+            <form id="leadForm">
+              <div class="field">
+                <div class="field-topline"><label for="name">Hunter name</label><span class="field-code">LOG: 001</span></div>
+                <input id="name" name="name" type="text" autocomplete="name" placeholder="Name for the Commission log" required>
+              </div>
+              <div class="field">
+                <div class="field-topline"><label for="email">Camp return address</label><span class="field-code">LOG: 002</span></div>
+                <input id="email" name="email" type="email" autocomplete="email" placeholder="Email for Commission replies" required>
+              </div>
+              <div class="field">
+                <div class="field-topline"><label for="message">Field report</label><span class="field-code">LOG: 003</span></div>
+                <textarea id="message" name="message" placeholder="Describe your discovery, question, or request..." required></textarea>
+              </div>
+              <input name="website" type="text" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <div class="dispatch-footer">
+                <span class="field-count" id="fieldCount"><strong>0 / 3</strong> report entries complete</span>
+                <button class="send-button" type="submit">Send report to camp <span class="button-arrow" aria-hidden="true">↗</span></button>
+              </div>
+              <p class="form-status" id="status" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const WORKER_URL = "https://lead-proxy.lubumario23.workers.dev/";
+    const leadForm = document.getElementById('leadForm');
+    const status = document.getElementById('status');
+    const submitButton = leadForm.querySelector('button[type="submit"]');
+    const fieldCount = document.getElementById('fieldCount');
+    const trackedFields = ['name', 'email', 'message'].map((id) => document.getElementById(id));
+
+    function updateProgress() {
+      let completed = 0;
+      trackedFields.forEach((field) => {
+        const isComplete = field.value.trim().length > 0 && field.validity.valid;
+        document.querySelector(`[data-step="${field.name}"]`).classList.toggle('is-complete', isComplete);
+        if (isComplete) completed += 1;
+      });
+      fieldCount.innerHTML = `<strong>${completed} / 3</strong> report entries complete`;
+    }
+
+    trackedFields.forEach((field) => field.addEventListener('input', updateProgress));
+
+    leadForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!leadForm.reportValidity()) return;
+
+      const data = Object.fromEntries(new FormData(leadForm));
+      status.dataset.state = 'sending';
+      status.textContent = 'Sending report to camp...';
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending report...';
+
+      if (data.website) {
+        status.dataset.state = 'success';
+        status.textContent = "Thanks! We'll get back to you soon.";
+        leadForm.reset();
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Send report to camp <span class="button-arrow" aria-hidden="true">↗</span>';
+        updateProgress();
+        return;
+      }
+
+      try {
+        const response = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error();
+        status.dataset.state = 'success';
+        status.textContent = "Thanks! We'll get back to you soon.";
+        leadForm.reset();
+        updateProgress();
+      } catch (error) {
+        status.dataset.state = 'error';
+        status.textContent = 'Something went wrong. Please try again.';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Send report to camp <span class="button-arrow" aria-hidden="true">↗</span>';
+      }
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
